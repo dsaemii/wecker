@@ -38,7 +38,8 @@ class _MyHomePageState extends State<MyHomePage> {
   void setTime() {
     setState(() {
       DateTime today = DateTime.now();
-      now = "${today.hour}:${today.minute}";
+      String minute = today.minute.toString().padLeft(2, '0');
+      now = "${today.hour}:$minute";
     });
   }
 
