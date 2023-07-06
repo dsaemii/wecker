@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
         useMaterial3: true,
       ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
@@ -39,14 +39,22 @@ class _MyHomePageState extends State<MyHomePage> {
   void setTime() {
     setState(() {
       DateTime today = DateTime.now();
-      // String hour = today.hour.toString().padLeft(2, '0');
+      String hour = today.hour.toString().padLeft(2, '0');
       String minute = today.minute.toString().padLeft(2, '0');
-      now = "${today.hour}:$minute";
+      now = "$hour:$minute";
     });
   }
 
-  /* void checkAlarm() {
-    if (now == alarm) {
+  void checkAlarm() {
+    DateTime nowTime = DateTime.now();
+    int nowHour = nowTime.hour;
+    int nowMinute = nowTime.minute;
+
+    List<String> alarmParts = alarm.split(':');
+    int alarmHour = int.parse(alarmParts[0]);
+    int alarmMinute = int.parse(alarmParts[1]);
+
+    if (nowHour == alarmHour && nowMinute == alarmMinute) {
       setState(() {
         alarmnow = "now";
       });
@@ -55,27 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
         alarmnow = "not now";
       });
     }
-  } */
-  void checkAlarm() {
-  DateTime nowTime = DateTime.now();
-  int nowHour = nowTime.hour;
-  int nowMinute = nowTime.minute;
-
-  List<String> alarmParts = alarm.split(':');
-  int alarmHour = int.parse(alarmParts[0]);
-  int alarmMinute = int.parse(alarmParts[1]);
-
-  if (nowHour == alarmHour && nowMinute == alarmMinute) {
-    setState(() {
-      alarmnow = "now";
-    });
-  } else {
-    setState(() {
-      alarmnow = "not now";
-    });
   }
-}
-
 
   // timer function
   void startTimer() {
@@ -98,25 +86,25 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _showEditDialog() async {
-  TimeOfDay? selectedTime = await showTimePicker(
-    context: context,
-    initialTime: TimeOfDay.now(),
-    initialEntryMode: TimePickerEntryMode.dial, // Set initial entry mode
-    builder: (BuildContext context, Widget? child) {
-      return MediaQuery(
-        // Override the default 12-hour format
-        data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
-        child: child!,
-      );
-    },
-  );
+    TimeOfDay? selectedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+      initialEntryMode: TimePickerEntryMode.input, // set to input (text) entry mode
+      builder: (BuildContext context, Widget? child) {
+        return MediaQuery(
+          // override the default 12-hour format
+          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+          child: child!,
+        );
+      },
+    );
 
-  if (selectedTime != null) {
-    setState(() {
-      alarm = selectedTime.format(context);
-    });
+    if (selectedTime != null) {
+      setState(() {
+        alarm = selectedTime.format(context);
+      });
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -127,21 +115,33 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             Text(
               now,
-              style: TextStyle(fontSize: 95), // Increase the font size
+              style: TextStyle(fontSize: 95),
             ),
             Text(
               alarm,
               style: TextStyle(fontSize: 25),
               ),
             Text(alarmnow),
+            FloatingActionButton(
+              onPressed: _showEditDialog,
+              backgroundColor: Colors.white,
+              // hforegroundColor: Colors.black,
+              elevation: 0,
+              child:
+                /*'einstellen',
+                style: TextStyle(fontSize: 24),*/
+                const Icon(Icons.edit),
+            ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+    );
+  }
+  /*floatingActionButton: FloatingActionButton(
         onPressed: _showEditDialog,
         tooltip: 'Edit Alarm',
         child: const Icon(Icons.edit),
       ),
     );
-  }
+  }*/
 }
