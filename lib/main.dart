@@ -39,13 +39,13 @@ class _MyHomePageState extends State<MyHomePage> {
   void setTime() {
     setState(() {
       DateTime today = DateTime.now();
-      String hour = today.hour.toString().padLeft(2, '0');
+      // String hour = today.hour.toString().padLeft(2, '0');
       String minute = today.minute.toString().padLeft(2, '0');
-      now = "$hour:$minute";
+      now = "${today.hour}:$minute";
     });
   }
 
-  void checkAlarm() {
+  /* void checkAlarm() {
     if (now == alarm) {
       setState(() {
         alarmnow = "now";
@@ -55,7 +55,27 @@ class _MyHomePageState extends State<MyHomePage> {
         alarmnow = "not now";
       });
     }
+  } */
+  void checkAlarm() {
+  DateTime nowTime = DateTime.now();
+  int nowHour = nowTime.hour;
+  int nowMinute = nowTime.minute;
+
+  List<String> alarmParts = alarm.split(':');
+  int alarmHour = int.parse(alarmParts[0]);
+  int alarmMinute = int.parse(alarmParts[1]);
+
+  if (nowHour == alarmHour && nowMinute == alarmMinute) {
+    setState(() {
+      alarmnow = "now";
+    });
+  } else {
+    setState(() {
+      alarmnow = "not now";
+    });
   }
+}
+
 
   // timer function
   void startTimer() {
@@ -77,45 +97,18 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
-    /*Future<void> _showEditDialog() async {
-    String? newAlarm = await showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        String? editedTime;
-
-        return AlertDialog(
-          title: const Text('Edit Alarm'),
-          content: TextField(
-            onChanged: (value) {
-              editedTime = value;
-            },
-            decoration: InputDecoration(
-              hintText: 'Enter time to set alarm',
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(editedTime);
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (newAlarm != null) {
-      setState(() {
-        alarm = newAlarm;
-      });
-    }
-  } */
-
   Future<void> _showEditDialog() async {
   TimeOfDay? selectedTime = await showTimePicker(
     context: context,
     initialTime: TimeOfDay.now(),
+    initialEntryMode: TimePickerEntryMode.dial, // Set initial entry mode
+    builder: (BuildContext context, Widget? child) {
+      return MediaQuery(
+        // Override the default 12-hour format
+        data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+        child: child!,
+      );
+    },
   );
 
   if (selectedTime != null) {
