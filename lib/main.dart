@@ -39,25 +39,56 @@ class _MyHomePageState extends State<MyHomePage> {
   // position
   bool isFlat = false;
   double sensorX = 0.0;
+  double sensorY = 0.0;
   // color
   Color backgroundColor = Colors.white;
+  // gyroscope
+  List<GyroscopeEvent> eventList = [];
+  final Duration measurementDuration = Duration(seconds: 1);
+  final int maxEventCount = 100;
 
+  void getAverageRotationRates() {
+    double totalXRotationRate = 0.0;
+    double totalYRotationRate = 0.0;
+
+    if (eventList.isNotEmpty) {
+      for (var event in eventList) {
+        totalXRotationRate += event.x;
+        totalYRotationRate += event.y;
+      }
+
+      double averageXRotationRate = totalXRotationRate / eventList.length;
+      double averageYRotationRate = totalYRotationRate / eventList.length;
+
+      sensorX = averageXRotationRate;
+      sensorY = averageYRotationRate;
+    }
+  }
 
   // gyroscope listener
   void _handleGyroscopeEvents() {
     gyroscopeEvents.listen((GyroscopeEvent event) {
-      // nur x relevant
-      bool flat = false;
-      double x =  event.x * 9.81 * 100;
+      eventList.add(event);
 
-      if (x < 20 && x > -17) {
+      if (eventList.length > maxEventCount) {
+        eventList.removeAt(0);
+      }
+      
+      // nur x und y relevant
+      bool flat = false;
+      /*double x =  event.x.abs();
+      double y =  event.y.abs();*/
+
+      getAverageRotationRates();
+      double treshold = 0.01;
+
+      if (sensorX < treshold && sensorX < treshold) {
         flat = true;
-      } else {
-        flat = false;
       }
 
       setState(() {
-        sensorX = x;
+        /*sensorX = x;
+        sensorY = y;*/
         isFlat = flat;
         backgroundColor = isFlat ? Colors.black : Colors.white;
       });
@@ -171,6 +202,13 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Text(
               'X: ' + sensorX.toStringAsFixed(4) + ' m/s²',
+              style: TextStyle(
+                fontSize: 25,
+                color: isFlat ? Colors.white : Colors.black,
+                ),
+            ),
+            Text(
+              'Y: ' + sensorY.toStringAsFixed(4) + ' m/s²',
               style: TextStyle(
                 fontSize: 25,
                 color: isFlat ? Colors.white : Colors.black,
