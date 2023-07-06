@@ -32,21 +32,36 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   String now = "00:00";
   String alarm = "00:00";
+  String alarmnow = "not now";
   Timer? timer;
 
 
   void setTime() {
     setState(() {
       DateTime today = DateTime.now();
+      String hour = today.hour.toString().padLeft(2, '0');
       String minute = today.minute.toString().padLeft(2, '0');
-      now = "${today.hour}:$minute";
+      now = "$hour:$minute";
     });
+  }
+
+  void checkAlarm() {
+    if (now == alarm) {
+      setState(() {
+        alarmnow = "now";
+      });
+    } else {
+      setState(() {
+        alarmnow = "not now";
+      });
+    }
   }
 
   // timer function
   void startTimer() {
     timer = Timer.periodic(Duration(seconds: 1), (timer) {
       setTime();
+      checkAlarm();
     });
   }
 
@@ -62,7 +77,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
-    Future<void> _showEditDialog() async {
+    /*Future<void> _showEditDialog() async {
     String? newAlarm = await showDialog<String>(
       context: context,
       builder: (BuildContext context) {
@@ -75,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
               editedTime = value;
             },
             decoration: InputDecoration(
-              hintText: 'Enter new alarm time',
+              hintText: 'Enter time to set alarm',
             ),
           ),
           actions: <Widget>[
@@ -92,21 +107,27 @@ class _MyHomePageState extends State<MyHomePage> {
 
     if (newAlarm != null) {
       setState(() {
-        alarm = newAlarm!;
+        alarm = newAlarm;
       });
     }
+  } */
+
+  Future<void> _showEditDialog() async {
+  TimeOfDay? selectedTime = await showTimePicker(
+    context: context,
+    initialTime: TimeOfDay.now(),
+  );
+
+  if (selectedTime != null) {
+    setState(() {
+      alarm = selectedTime.format(context);
+    });
   }
+}
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-
     return Scaffold(
-      /*appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),*/
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -115,7 +136,11 @@ class _MyHomePageState extends State<MyHomePage> {
               now,
               style: TextStyle(fontSize: 95), // Increase the font size
             ),
-            Text(alarm),
+            Text(
+              alarm,
+              style: TextStyle(fontSize: 25),
+              ),
+            Text(alarmnow),
           ],
         ),
       ),
