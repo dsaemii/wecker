@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sensors_plus/sensors_plus.dart';
+import 'package:vibration/vibration.dart';
 import 'dart:async';
 
 void main() {
@@ -34,7 +35,7 @@ class _MyHomePageState extends State<MyHomePage> {
   // alarm
   String now = "00:00";
   String alarm = "00:00";
-  String alarmnow = "not now";
+  bool isAlarm= false;
   Timer? timer;
   // position
   bool isFlat = false;
@@ -46,6 +47,23 @@ class _MyHomePageState extends State<MyHomePage> {
   List<GyroscopeEvent> eventList = [];
   final Duration measurementDuration = Duration(seconds: 1);
   final int maxEventCount = 100;
+
+  // alarm vibration
+  void startVibration() {
+    if (isAlarm) {
+      Vibration.vibrate(pattern: [500, 1000], intensities: [128]);
+    }
+  }
+
+  // 'isFlat' listener to stop vibration
+  @override
+  void didUpdateWidget(MyHomePage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!isFlat) {
+      Vibration.cancel();
+    }
+  }
+
 
   void getAverageRotationRates() {
     double totalXRotationRate = 0.0;
@@ -115,11 +133,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
     if (nowHour == alarmHour && nowMinute == alarmMinute) {
       setState(() {
-        alarmnow = "now";
+        isAlarm = true;
       });
+      startVibration();
     } else {
       setState(() {
-        alarmnow = "not now";
+        isAlarm = false;
       });
     }
   }
@@ -188,7 +207,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 color: isFlat ? Colors.white : Colors.black,
               ),
             ),
-            Text(alarmnow, style: TextStyle(color: isFlat ? Colors.white : Colors.black,)),
+            Text(isAlarm.toString(), style: TextStyle(color: isFlat ? Colors.white : Colors.black,)),
             
             AnimatedOpacity(
               opacity: isFlat ? 0.0 : 1.0,
