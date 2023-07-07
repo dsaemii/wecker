@@ -52,7 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
   // alarm vibration
   void startVibration() {
     if (isAlarm && !alarmRang) {
-      Vibration.vibrate(pattern: [500, 1000], intensities: [128]);
+      Vibration.vibrate(pattern: [500, 1000], intensities: [255]);
     }
   }
 
@@ -97,8 +97,8 @@ class _MyHomePageState extends State<MyHomePage> {
         if (!isFlat && isAlarm) {
           Vibration.cancel();
           setState(() {
-          alarmRang = true;
-        });
+            alarmRang = true;
+          });
         }
         backgroundColor = isFlat ? Colors.black : Colors.white;
       });
