@@ -36,6 +36,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String now = "00:00";
   String alarm = "00:00";
   bool isAlarm= false;
+  bool alarmRang = false;
   Timer? timer;
   // position
   bool isFlat = false;
@@ -50,20 +51,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // alarm vibration
   void startVibration() {
-    if (isAlarm) {
+    if (isAlarm && !alarmRang) {
       Vibration.vibrate(pattern: [500, 1000], intensities: [128]);
     }
   }
-
-  // 'isFlat' listener to stop vibration
-  @override
-  void didUpdateWidget(MyHomePage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (!isFlat) {
-      Vibration.cancel();
-    }
-  }
-
 
   void getAverageRotationRates() {
     double totalXRotationRate = 0.0;
@@ -92,10 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
         eventList.removeAt(0);
       }
       
-      // nur x und y relevant
       bool flat = false;
-      /*double x =  event.x.abs();
-      double y =  event.y.abs();*/
 
       getAverageRotationRates();
       double treshold = 0.01;
@@ -105,9 +93,13 @@ class _MyHomePageState extends State<MyHomePage> {
       }
 
       setState(() {
-        /*sensorX = x;
-        sensorY = y;*/
         isFlat = flat;
+        if (!isFlat && isAlarm) {
+          Vibration.cancel();
+          setState(() {
+          alarmRang = true;
+        });
+        }
         backgroundColor = isFlat ? Colors.black : Colors.white;
       });
     });
@@ -131,7 +123,7 @@ class _MyHomePageState extends State<MyHomePage> {
     int alarmHour = int.parse(alarmParts[0]);
     int alarmMinute = int.parse(alarmParts[1]);
 
-    if (nowHour == alarmHour && nowMinute == alarmMinute) {
+    if (nowHour == alarmHour && nowMinute == alarmMinute && !alarmRang) {
       setState(() {
         isAlarm = true;
       });
@@ -181,6 +173,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if (selectedTime != null) {
       setState(() {
         alarm = selectedTime.format(context);
+        alarmRang = false;
       });
     }
   }
@@ -207,8 +200,14 @@ class _MyHomePageState extends State<MyHomePage> {
                 color: isFlat ? Colors.white : Colors.black,
               ),
             ),
-            Text(isAlarm.toString(), style: TextStyle(color: isFlat ? Colors.white : Colors.black,)),
-            
+            /* uncomement to show 'isAlarm' state
+            Text(
+              isAlarm.toString(),
+              style:
+                TextStyle(
+                  color: isFlat ? Colors.white : Colors.black,
+                ),
+            ), */
             AnimatedOpacity(
               opacity: isFlat ? 0.0 : 1.0,
               duration: Duration(milliseconds: 1),
@@ -219,6 +218,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: const Icon(Icons.edit),
             ),
             ),
+            /* uncomment to show sensor data and 'isFlat' state
             Text(
               'X: ' + sensorX.toStringAsFixed(4) + ' m/s²',
               style: TextStyle(
@@ -239,7 +239,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 fontSize: 25,
                 color: isFlat ? Colors.white : Colors.black,
                 ),
-            )
+            ) */
           ],
         ),
       ),
